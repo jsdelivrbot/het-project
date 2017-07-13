@@ -48,33 +48,49 @@ var Bar = function(x, y, radius, rotation, thickness, ctx) {
 	this.draw = function() {
 		ctx.beginPath();
 		ctx.lineWidth = thickness;
-		ctx.moveTo(lx, ly);
-		ctx.lineTo(rx, ry);
+		ctx.moveTo(lx, ly + thickness);
+		ctx.lineTo(rx, ry + thickness);
 		ctx.stroke();
 	};
 
 	this.getLineVector = function() {
 		return [lx, ly, rx, ry];
 	};
+	
+	this.getAngle = function() {
+		return ang;
+	}
 };
 
-var Marble = function(x, y, angle, ctx) {
+var Marble = function(x, y, angle, bars, ctx) {
 	var _x = x, _y = y, x1 = x, y1 = y, 
 		rad90 = 90 * (Math.PI / 180),
 		rad180 = Math.PI,
 		rad360 = 360 * (Math.PI / 180),
 		acc = 0,
-		ang = angle;
+		ang = angle,
+		wasFlying = true;
 	
 	function gravAcceleration() {
 		return  ang > rad90
-			? (rad180 - ang) * 0.05
-			: ang * 0.05
+			? (rad180 - ang) * 0.008
+			: ang * 0.008
 			;
 	}
 	
 	function downwardCollision() {
-		// !collidesWithDownwardVector
+		for (var i = 0; i < bars.length; i++) {
+			var collides = linesIntersect(
+				bars[i].getLineVector(),
+				[_x, _y, _x + Math.cos(rad90) * acc, _y + Math.sin(rad90) * acc ]
+			);
+			if (collides) {
+				return {
+					collides: true,
+					angle: bars[i].getAngle()
+				};
+			}
+		}
 		return {
 			collides: false
 		};
@@ -99,13 +115,14 @@ var Marble = function(x, y, angle, ctx) {
 		
 		var collision = downwardCollision()
 		if (collision.collides) {
-			ang = collision.angle === rad180 || collision.angle === 0
-				? (ang > rad90 ? rad180 : 0) : collision.angle;
+			ang = collision.angle;
+
 		} else {
+			wasFlying = true;
 			if (ang < rad90) {
-				ang += 0.005;
+				ang += 0.05;
 			} else if (ang > rad90) {
-				ang -= 0.005;
+				ang -= 0.05;
 			}
 		}
 	};
@@ -113,22 +130,24 @@ var Marble = function(x, y, angle, ctx) {
 	this.draw = function() {
 		ctx.arc(
 			x1,y1,
-			3,  0, 2 * Math.PI, false
+			4,  0, 2 * Math.PI, false
 		)
 	};
 };
 
+var bars = [
+	new Bar(255, 250, 250, 25, 3, ctx),
+	new Bar(350, 500, 250, 350 - 180, 3, ctx)
+];
 
 var marbles = [
-	new Marble(260, 10, 20 * (Math.PI / 180), ctx), 
-	new Marble(250, 10, 140 * (Math.PI / 180), ctx)
+	new Marble(260, 10, 20 * (Math.PI / 180), bars, ctx), 
+	new Marble(250, 10, 140 * (Math.PI / 180), bars, ctx),
+	new Marble(265, 10, 22 * (Math.PI / 180), bars, ctx), 
+	new Marble(240, 10, 138 * (Math.PI / 180), bars, ctx),
 ];
 
-var bars = [
-	new Bar(255, 250, 250, 20, 3, ctx),
-	new Bar(255, 252, 250, 19.5, 3, ctx)
 
-];
 
 var frameRenderer = (function(ctx) {
 	var width, height;
@@ -139,11 +158,11 @@ var frameRenderer = (function(ctx) {
 	
 	function render() {
 		ctx.clearRect(0,0,width,height);
-		ctx.beginPath();
 		for (var i = 0; i < marbles.length; i++) {
+			ctx.beginPath();
 			marbles[i].draw();
+			ctx.fill();
 		}
-		ctx.fill();
 		for (var i = 0; i < bars.length; i++) {
 			bars[i].draw();
 		}
