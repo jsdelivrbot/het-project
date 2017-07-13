@@ -1,9 +1,9 @@
 const webpack = require('webpack');
 
 module.exports = {
-  entry: "./web/index.js",
+  entry: "./src/index.js",
   output: {
-    path: "./public",
+    path: "./",
     filename: "index.js"
   },
   plugins: [
