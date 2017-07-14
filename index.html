@@ -157,7 +157,7 @@ window.setTimeout(function() { bars.shift(); }, 3000);
 window.setTimeout(function() { bars.shift(); }, 2000);
 
 
-var frameRenderer = (function(ctx) {
+var FrameRenderer = function(ctx) {
 	var width, height;
 	this.onResize = function(w, h) {
 		width = w;
@@ -177,7 +177,9 @@ var frameRenderer = (function(ctx) {
 
 	requestAnimationFrame(render);
 	return this;
-})(ctx);
+};
+
+var frameRenderer = new FrameRenderer(ctx);
 
 window.setInterval(function() {
 	for (var i = 0; i < marbles.length; i++) {
