@@ -1,14 +1,3 @@
-<html>
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-</head>
-<body style="margin: 0; padding: 0; width: 100%; height: 100%">
-<canvas id="can" style="">
-
-</canvas>
-
-<script>
 
 var can = document.getElementById("can");
 var ctx = can.getContext('2d');
@@ -39,20 +28,17 @@ var linesIntersect = function(lineA, lineB) {
 };
 
 var Bar = function(x, y, radius, rotation, thickness, ctx) {
-	var ang, lx, ly, rx, ry;
-	this.setRotation = function(rot) {
-		ang = rot * (Math.PI / 180);
-		ly = parseInt(Math.ceil(y - Math.sin(ang) * radius), 10);
-		lx = parseInt(Math.ceil(x - Math.cos(ang) * radius), 10);
-		rx = parseInt(Math.ceil(x + Math.cos(ang) * radius), 10);
+	var ang = rotation * (Math.PI / 180),
+		ly = parseInt(Math.ceil(y - Math.sin(ang) * radius), 10),
+		lx = parseInt(Math.ceil(x - Math.cos(ang) * radius), 10),
+		rx = parseInt(Math.ceil(x + Math.cos(ang) * radius), 10),
 		ry = parseInt(Math.ceil(y + Math.sin(ang) * radius), 10);
-	}
 
 	this.draw = function() {
 		ctx.beginPath();
 		ctx.lineWidth = thickness;
-		ctx.moveTo(lx, ly);
-		ctx.lineTo(rx, ry);
+		ctx.moveTo(lx, ly + thickness);
+		ctx.lineTo(rx, ry + thickness);
 		ctx.stroke();
 	};
 
@@ -63,13 +49,10 @@ var Bar = function(x, y, radius, rotation, thickness, ctx) {
 	this.getAngle = function() {
 		return ang;
 	}
-	
-	this.setRotation(rotation);
-	return this;
 };
 
-var Marble = function(x, y, angle, bars, radius, ctx) {
-	var _x = x, _y = y, x1 = x, y1 = y, maxAcc = 3, 
+var Marble = function(x, y, angle, bars, ctx) {
+	var _x = x, _y = y, x1 = x, y1 = y, 
 		rad90 = 90 * (Math.PI / 180),
 		rad180 = Math.PI,
 		rad360 = 360 * (Math.PI / 180),
@@ -80,15 +63,15 @@ var Marble = function(x, y, angle, bars, radius, ctx) {
 	function gravAcceleration() {
 		return  ang > rad90
 			? (rad180 - ang) * 0.008
-			: ang * 0.008;
+			: ang * 0.008
+			;
 	}
 	
-	function collidesWithBar(_ang) {
+	function downwardCollision() {
 		for (var i = 0; i < bars.length; i++) {
 			var collides = linesIntersect(
 				bars[i].getLineVector(),
-				[_x, _y, _x + Math.cos(_ang) * (radius + 1),
-						 _y + Math.sin(_ang) * (radius + 1)]
+				[_x, _y, _x + Math.cos(rad90) * acc, _y + Math.sin(rad90) * acc ]
 			);
 			if (collides) {
 				return {
@@ -101,60 +84,58 @@ var Marble = function(x, y, angle, bars, radius, ctx) {
 			collides: false
 		};
 	}
-
-
+	
+	function blocked() {
+		// collidesWithCurrentDirectionVector
+		return false;
+	}
+	
 	this.accelerate = function() {
-		acc += gravAcceleration();
 		_y += Math.sin(ang) * acc;
 		_x += Math.cos(ang) * acc;
 		x1 = parseInt(Math.ceil(_x), 10);
 		y1 = parseInt(Math.ceil(_y), 10);
 		
-		var collision = collidesWithBar(rad90);
+		if (blocked()) {
+			acc = 0;
+		} else {
+			acc += gravAcceleration();
+		}
+		
+		var collision = downwardCollision()
 		if (collision.collides) {
 			ang = collision.angle;
-			if (collision.angle === rad180 || collision.angle === 0) {
-				acc = 0;
-			}
+
 		} else {
 			wasFlying = true;
 			if (ang < rad90) {
-				ang += 0.1;
+				ang += 0.05;
 			} else if (ang > rad90) {
-				ang -= 0.1;
+				ang -= 0.05;
 			}
 		}
-		
-
 	};
 
 	this.draw = function() {
-		ctx.beginPath();
-		ctx.fillStyle = "red";
 		ctx.arc(
 			x1,y1,
-			radius - 1,  0, 2 * Math.PI, false
+			4,  0, 2 * Math.PI, false
 		)
-		ctx.fill();
 	};
 };
 
 var bars = [
-	new Bar(140, 50, 30, 0, 2, ctx),
-	new Bar(240, 50, 30, 0, 2, ctx),
-	new Bar(140, 150, 150, 25, 4, ctx)
+	new Bar(255, 250, 250, 25, 3, ctx),
+	new Bar(350, 500, 250, 350 - 180, 3, ctx)
 ];
 
 var marbles = [
-	new Marble(120, 10, 0, bars, 8, ctx), 
-	new Marble(140, 10, 0, bars, 8, ctx),
-	new Marble(220, 10, 0, bars, 8, ctx), 
-	new Marble(240, 10, 0, bars, 8, ctx),
+	new Marble(260, 10, 20 * (Math.PI / 180), bars, ctx), 
+	new Marble(250, 10, 140 * (Math.PI / 180), bars, ctx),
+	new Marble(265, 10, 22 * (Math.PI / 180), bars, ctx), 
+	new Marble(240, 10, 138 * (Math.PI / 180), bars, ctx),
 ];
 
-window.setTimeout(function() { bars.shift(); }, 3000);
-
-window.setTimeout(function() { bars.shift(); }, 2000);
 
 
 var frameRenderer = (function(ctx) {
@@ -166,11 +147,13 @@ var frameRenderer = (function(ctx) {
 	
 	function render() {
 		ctx.clearRect(0,0,width,height);
+		for (var i = 0; i < marbles.length; i++) {
+			ctx.beginPath();
+			marbles[i].draw();
+			ctx.fill();
+		}
 		for (var i = 0; i < bars.length; i++) {
 			bars[i].draw();
-		}
-		for (var i = 0; i < marbles.length; i++) {
-			marbles[i].draw();
 		}
 		requestAnimationFrame(render);
 	}
@@ -207,6 +190,4 @@ var viewPort = (function(listeners) {
 	return this;
 })(resizeListeners);
 
-</script>
-</body>
-</html>
+
