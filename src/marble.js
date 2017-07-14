@@ -1,5 +1,3 @@
-import linesIntersect from "./lines-intersect";
-
 const maxAcc = 3;
 const rad90 = 90 * (Math.PI / 180);
 const rad180 = Math.PI;
@@ -7,14 +5,14 @@ const rad360 = 360 * (Math.PI / 180);
 
 class Marble {
 
-	constructor(x, y, angle, bars, radius) {
+	constructor({ x, y, angle, collidesWithBar, radius }) {
 		this._x = x;
 		this._y = y;
 		this.x1 = x; 
 		this.y1 = y;
 		this.acc = 0;
 		this.ang = angle;
-		this.bars = bars;
+		this.collidesWithBar = collidesWithBar;
 		this.radius = radius;
 	}
 	
@@ -22,28 +20,6 @@ class Marble {
 		return  this.ang > rad90
 			? (rad180 - this.ang) * 0.008
 			: this.ang * 0.008;
-	}
-
-	collidesWithBar(_ang) {
-		for (var i = 0; i < this.bars.length; i++) {
-			var collides = linesIntersect(
-				this.bars[i].getLineVector(),
-				[
-					this._x, this._y, 
-					this._x + Math.cos(_ang) * (this.radius + 1),
-					this._y + Math.sin(_ang) * (this.radius + 1)
-				]
-			);
-			if (collides) {
-				return {
-					collides: true,
-					angle: this.bars[i].getAngle()
-				};
-			}
-		}
-		return {
-			collides: false
-		};
 	}
 
 
@@ -54,7 +30,7 @@ class Marble {
 		this.x1 = parseInt(Math.ceil(this._x), 10);
 		this.y1 = parseInt(Math.ceil(this._y), 10);
 		
-		var collision = this.collidesWithBar(rad90);
+		var collision = this.collidesWithBar(this, rad90);
 		if (collision.collides) {
 			this.ang = collision.angle;
 			if (collision.angle === rad180 || collision.angle === 0) {

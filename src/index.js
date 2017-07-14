@@ -1,27 +1,39 @@
 import Marble from "./marble";
 import Bar from "./bar";
+import collidersMaker from "./colliders";
 
-var can = document.getElementById("can");
-var ctx = can.getContext('2d');
+const can = document.getElementById("can");
+const ctx = can.getContext('2d');
 
 
-var bars = [
+let bars = [
 	new Bar(140, 50, 30, 0, 2),
 	new Bar(240, 50, 30, 0, 2),
-	new Bar(140, 150, 150, 25, 4)
+	new Bar(140, 150, 150, 25, 4),
+	new Bar(240, 250, 150, 165, 4)
 ];
 
-var marbles = [
-	new Marble(120, 10, 0, bars, 8, ctx), 
-	new Marble(140, 10, 0, bars, 8, ctx),
-	new Marble(220, 10, 0, bars, 8, ctx), 
-	new Marble(240, 10, 0, bars, 8, ctx),
+const colliders = collidersMaker(bars);
+
+const baseMarbleOpts = {
+	y: 10, angle: 0, radius: 8,
+	collidesWithBar: colliders.marbleCollidesWithBar
+};
+
+let marbles = [
+	new Marble({...baseMarbleOpts, x: 120}),
+	new Marble({...baseMarbleOpts, x: 140}),
+	new Marble({...baseMarbleOpts, x: 220}),
+	new Marble({...baseMarbleOpts, x: 240}),
 ];
 
 window.setTimeout(function() { bars.shift(); }, 3000);
 
 window.setTimeout(function() { bars.shift(); }, 2000);
-
+window.setTimeout(function() { marbles.shift(); }, 6000);
+window.setTimeout(function() { marbles.shift(); }, 6100);
+window.setTimeout(function() { marbles.shift(); }, 6200);
+window.setTimeout(function() { marbles.shift(); }, 6300);
 
 var FrameRenderer = function(ctx) {
 	var width, height;
