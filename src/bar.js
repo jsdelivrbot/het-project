@@ -20,6 +20,7 @@ class Bar {
 	draw(ctx) {
 		ctx.beginPath();
 		ctx.lineWidth = this.thickness;
+		ctx.strokeStyle = "rgb(128,128,0)";
 		ctx.moveTo(this.lx, this.ly);
 		ctx.lineTo(this.rx, this.ry);
 		ctx.stroke();

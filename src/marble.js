@@ -1,3 +1,5 @@
+import uuid from "uuid";
+
 const maxAcc = 3;
 const rad90 = 90 * (Math.PI / 180);
 const rad180 = Math.PI;
@@ -5,7 +7,9 @@ const rad360 = 360 * (Math.PI / 180);
 
 class Marble {
 
-	constructor({ x, y, angle, collidesWithBar, radius }) {
+	constructor({ x, y, angle,  radius, 
+			collidesWithBar, collidesWithMarble }) {
+		this._id = uuid();
 		this._x = x;
 		this._y = y;
 		this.x1 = x; 
@@ -13,6 +17,7 @@ class Marble {
 		this.acc = 0;
 		this.ang = angle;
 		this.collidesWithBar = collidesWithBar;
+		this.collidesWithMarble = collidesWithMarble;
 		this.radius = radius;
 	}
 	
@@ -30,7 +35,7 @@ class Marble {
 		this.x1 = parseInt(Math.ceil(this._x), 10);
 		this.y1 = parseInt(Math.ceil(this._y), 10);
 		
-		var collision = this.collidesWithBar(this, rad90);
+		const collision = this.collidesWithBar(this, rad90);
 		if (collision.collides) {
 			this.ang = collision.angle;
 			if (collision.angle === rad180 || collision.angle === 0) {
@@ -45,15 +50,31 @@ class Marble {
 		}
 		
 
+		this.collidesWithMarble(this);
+
 	};
+
+	bounceAwayFrom(otherMarble, distance) {
+		const amount = (this.radius + otherMarble.radius) - distance;
+
+		this._x = otherMarble._x < this._x ? 
+			otherMarble._x + otherMarble.radius + this.radius :
+			otherMarble._x - otherMarble.radius - this.radius;
+
+		this.x1 = parseInt(Math.ceil(this._x), 10);
+
+	}
 
 	draw(ctx) {
 		ctx.beginPath();
 		ctx.fillStyle = "red";
+		ctx.strokeStyle = "rgba(255,255,255,0.5)";
+		ctx.strokeWidth = 1;
 		ctx.arc(
 			this.x1, this.y1,
-			this.radius - 1,  0, 2 * Math.PI, false
+			this.radius - 0.1,  0, 2 * Math.PI, false
 		)
+		ctx.stroke();
 		ctx.fill();
 	};
 }
