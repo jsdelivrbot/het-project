@@ -25,8 +25,9 @@ const baseMarbleOpts = {
 	angle: 0, 
 	radius: 8,
 	collidesWithBar: colliders.marbleCollidesWithBar,
-	collidesWithMarble: colliders.marbleCollidesWithMarble
+	collidesWithMarble: colliders.marbleCollidesWithMarble,
 };
+
 
 addMarble([
 
@@ -37,16 +38,10 @@ addMarble([
 	new Marble({...baseMarbleOpts, x: 132, y: 10}),
 ]);
 
-const frameRenderer = frameRendererMaker(ctx);
+const frameRenderer = frameRendererMaker(ctx, 380);
 
 window.setTimeout(function() { removeBar(0) }, 3000);
 window.setTimeout(function() { removeBar(0) }, 5000);
-/*window.setTimeout(function() { removeMarble(0); }, 6000);
-window.setTimeout(function() { removeMarble(0); }, 6100);
-window.setTimeout(function() { removeMarble(0); }, 6200);
-window.setTimeout(function() { removeMarble(0); }, 6300);
-*/
-
 
 window.setInterval(function() {
 	const marbles = getMarbles();
@@ -55,6 +50,7 @@ window.setInterval(function() {
 	}
 	frameRenderer.render(getMarbles().concat(getBars()));
 }, 10);
+
 
 var resizeListeners = (function(canvas) {
 	function log() { console.log(arguments); }

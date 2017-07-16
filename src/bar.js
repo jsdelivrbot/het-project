@@ -17,12 +17,12 @@ class Bar {
 		this.ry = parseInt(Math.ceil(this.y + Math.sin(this.ang) * this.radius), 10);
 	}
 
-	draw(ctx) {
+	draw(ctx, scale) {
 		ctx.beginPath();
-		ctx.lineWidth = this.thickness;
+		ctx.lineWidth = this.thickness * scale;
 		ctx.strokeStyle = "rgb(128,128,0)";
-		ctx.moveTo(this.lx, this.ly);
-		ctx.lineTo(this.rx, this.ry);
+		ctx.moveTo(this.lx * scale, this.ly * scale);
+		ctx.lineTo(this.rx * scale, this.ry * scale);
 		ctx.stroke();
 	}
 

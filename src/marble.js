@@ -65,14 +65,14 @@ class Marble {
 
 	}
 
-	draw(ctx) {
+	draw(ctx, scale) {
 		ctx.beginPath();
 		ctx.fillStyle = "red";
 		ctx.strokeStyle = "rgba(255,255,255,0.5)";
 		ctx.strokeWidth = 1;
 		ctx.arc(
-			this.x1, this.y1,
-			this.radius - 0.1,  0, 2 * Math.PI, false
+			this.x1 * scale, this.y1 * scale,
+			this.radius * scale,  0, 2 * Math.PI, false
 		)
 		ctx.stroke();
 		ctx.fill();
