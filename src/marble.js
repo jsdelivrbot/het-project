@@ -19,6 +19,8 @@ class Marble {
 		this.collidesWithBar = collidesWithBar;
 		this.collidesWithMarble = collidesWithMarble;
 		this.radius = radius;
+		this.active = false;
+		this.fill = "red";
 	}
 	
 	gravAcceleration() {
@@ -67,7 +69,7 @@ class Marble {
 
 	draw(ctx, scale) {
 		ctx.beginPath();
-		ctx.fillStyle = "red";
+		ctx.fillStyle = this.fill;
 		ctx.strokeStyle = "rgba(255,255,255,0.5)";
 		ctx.strokeWidth = 1;
 		ctx.arc(

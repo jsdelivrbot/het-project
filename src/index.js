@@ -8,20 +8,13 @@ import getColliders from "./colliders";
 import { addBar, removeBar, getBars } from "./bars";
 import { addMarble, removeMarble, getMarbles } from "./marbles";
 
-const getEventHandlers = (ev, scale) => ({
-	touchstart: (ev, scale) => console.log("touchstart is impl", scale)
-})
+
+const eventListeners = getEventListeners(380);
 
 const can = document.getElementById("can");
 const ctx = can.getContext('2d');
 const textCan = document.getElementById("text-can");
 const textCtx = textCan.getContext('2d');
-const eventListeners = getEventListeners(
-	["touchstart", "touchend"],
-	(key, ev, scale) => 
-		(getEventHandlers()[key] || 
-			function() { console.warn(`event ${key} not registered`)})(ev, scale) ,
-	380);
 const frameRenderer = getFrameRenderer(ctx, 380);
 const textRenderer = getFrameRenderer(textCtx, 380);
 
@@ -35,9 +28,80 @@ const renderLoop = () => {
 initViewPort(getResizeListeners([can, textCan],
 	frameRenderer.onResize, textRenderer.onResize, 
 	eventListeners.onResize));
+
 renderLoop();
 
+const game = () => {
+	const leftSide = parseInt(Math.random() * 9, 10) + 1;
+	const rightSide = parseInt(Math.random() * (10 - leftSide), 10) + 1;
+	const textOpts = {y: 40, fill: "green", font: "bold 26px sans-serif"};
 
+	const clearLeftText = textRenderer.drawText(leftSide, {...textOpts,
+		x: 20});
+	const clearLeftRight = textRenderer.drawText(rightSide, {...textOpts,
+		x: 200});
+	const clearPlus = textRenderer.drawText("+", {...textOpts,
+		x: 110});
+	const clearEquals = textRenderer.drawText("=", {...textOpts,
+		x: 290});
+
+	const baseMarbleOpts = {
+		y: 70, 
+		angle: 0, 
+		radius: 10,
+		collidesWithBar: colliders.marbleCollidesWithBar,
+		collidesWithMarble: colliders.marbleCollidesWithMarble,
+	};
+
+
+	for (let i = 0; i < leftSide; i++) {
+		const x = 10 + i * 20
+		addMarble(new Marble({...baseMarbleOpts, x: x}));
+	}
+
+	for (let i = 0; i < rightSide; i++) {
+		const x = 200 + i * 20
+		addMarble(new Marble({...baseMarbleOpts, x: x}));
+	}
+
+	addBar([
+		new Bar(140, 150, 150, 5, 4),
+		new Bar(240, 200, 150, 175, 4),
+		new Bar(100, 300, 100, 5, 4),
+		new Bar(190, 350, 190, 0, 4),
+	]);
+
+
+	eventListeners.clear();
+
+	eventListeners.add("touchstart", (name, ev, scale) => {
+		const {clientX, clientY} = ev.touches[0];
+		const x = clientX / scale;
+		const y = clientY / scale;
+		const foundMarble = getMarbles()
+			.find((marble, idx) => 
+				x > marble._x - marble.radius &&
+				x < marble._x + marble.radius &&
+				y > marble._y - marble.radius &&
+				y < marble._y + marble.radius
+			);
+		
+		if (foundMarble) {
+			foundMarble.active = true;
+		}		
+	});
+
+	window.setInterval(() => getMarbles()
+		.filter(m => m.active)
+		.forEach(m => m.accelerate()), 5);
+
+};
+
+game();
+
+
+
+/*
 
 textRenderer.drawText("bla", {
 	fill: "green", 
@@ -84,3 +148,4 @@ window.setInterval(function() {
 	}
 }, 10);
 
+*/

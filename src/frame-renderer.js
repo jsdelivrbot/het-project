@@ -24,7 +24,11 @@ export default (ctx, vWidth) => {
 			ctx.fillStyle = fill || "#a00";
 			ctx.fillText(txt, _x, _y);
 			const width = ctx.measureText(txt).width;
-			setTimeout(() => ctx.clearRect(_x, _y - 27, width + 5, 32), timeout || 500);
+			const doClear = () => ctx.clearRect(_x, _y - 27, width + 5, 32);
+			if (timeout) {
+				setTimeout(doClear, timeout || 500);
+			}
+			return doClear;
 		}
 	}
 }
