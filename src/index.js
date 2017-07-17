@@ -1,15 +1,38 @@
+import getFrameRenderer from "./frame-renderer";
+import getResizeListeners from "./resize-listeners";
+import initViewPort from "./viewport";
 import Marble from "./marble";
 import Bar from "./bar";
-import collidersMaker from "./colliders";
-import frameRendererMaker from "./frame-renderer";
+import getColliders from "./colliders";
 import { addBar, removeBar, getBars } from "./bars";
 import { addMarble, removeMarble, getMarbles } from "./marbles";
 
 const can = document.getElementById("can");
 const ctx = can.getContext('2d');
+const textCan = document.getElementById("text-can");
+const textCtx = textCan.getContext('2d');
+
+const frameRenderer = getFrameRenderer(ctx, 380);
+const textRenderer = getFrameRenderer(textCtx, 380);
+
+const colliders = getColliders(getBars, getMarbles);
+
+const renderLoop = () => {
+	frameRenderer.render(getMarbles().concat(getBars()));
+	requestAnimationFrame(renderLoop);
+};
+
+initViewPort(getResizeListeners([can, textCan], frameRenderer.onResize, textRenderer.onResize));
+renderLoop();
 
 
-const colliders = collidersMaker(getBars, getMarbles);
+
+textRenderer.drawText("bla", {
+	fill: "green", 
+	timeout: 1000,
+	shade: "rgba(0,0,0,0.2)",
+	shadeDistance: 2
+});
 
 addBar([
 	new Bar(140, 50, 30, 0, 2),
@@ -38,7 +61,6 @@ addMarble([
 	new Marble({...baseMarbleOpts, x: 132, y: 10}),
 ]);
 
-const frameRenderer = frameRendererMaker(ctx, 380);
 
 window.setTimeout(function() { removeBar(0) }, 3000);
 window.setTimeout(function() { removeBar(0) }, 5000);
@@ -48,28 +70,5 @@ window.setInterval(function() {
 	for (var i = 0; i < marbles.length; i++) {
 		marbles[i].accelerate();
 	}
-	frameRenderer.render(getMarbles().concat(getBars()));
 }, 10);
 
-
-var resizeListeners = (function(canvas) {
-	function log() { console.log(arguments); }
-	function rescaleGame(width, height) {
-		canvas.width = width;
-		canvas.height = height;
-	}
-
-	return [log, rescaleGame, frameRenderer.onResize];
-})(can);
-
-var viewPort = (function(listeners) {
-	function onResize() {
-		resizeListeners.forEach(function (listener) { 
-			listener(window.innerWidth, window.innerHeight);
-		});
-	}
-	
-	onResize();
-	window.addEventListener("resize", onResize);
-	return this;
-})(resizeListeners);
