@@ -1,17 +1,27 @@
 import getFrameRenderer from "./frame-renderer";
 import getResizeListeners from "./resize-listeners";
 import initViewPort from "./viewport";
+import getEventListeners from "./event-listeners";
 import Marble from "./marble";
 import Bar from "./bar";
 import getColliders from "./colliders";
 import { addBar, removeBar, getBars } from "./bars";
 import { addMarble, removeMarble, getMarbles } from "./marbles";
 
+const getEventHandlers = (ev, scale) => ({
+	touchstart: (ev, scale) => console.log("touchstart is impl", scale)
+})
+
 const can = document.getElementById("can");
 const ctx = can.getContext('2d');
 const textCan = document.getElementById("text-can");
 const textCtx = textCan.getContext('2d');
-
+const eventListeners = getEventListeners(
+	["touchstart", "touchend"],
+	(key, ev, scale) => 
+		(getEventHandlers()[key] || 
+			function() { console.warn(`event ${key} not registered`)})(ev, scale) ,
+	380);
 const frameRenderer = getFrameRenderer(ctx, 380);
 const textRenderer = getFrameRenderer(textCtx, 380);
 
@@ -22,7 +32,9 @@ const renderLoop = () => {
 	requestAnimationFrame(renderLoop);
 };
 
-initViewPort(getResizeListeners([can, textCan], frameRenderer.onResize, textRenderer.onResize));
+initViewPort(getResizeListeners([can, textCan],
+	frameRenderer.onResize, textRenderer.onResize, 
+	eventListeners.onResize));
 renderLoop();
 
 
