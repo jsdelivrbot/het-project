@@ -5,10 +5,10 @@ const addBar = (toAdd = []) => {
 	return bars.length - 1;
 };
 
-const removeBar = (idx) =>
-	bars.splice(idx, 1)
+const clearBars = () =>
+	bars = [];
 
 
 const getBars = () => bars;
 
-export { addBar, removeBar, getBars }
+export { addBar, clearBars, getBars }

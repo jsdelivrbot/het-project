@@ -5,10 +5,10 @@ const addMarble = (toAdd = []) => {
 	return marbles.length - 1;
 };
 
-const removeMarble = (idx) =>
-	marbles.splice(idx, 1)
+const clearMarbles = () =>
+	marbles = [];
 
 
 const getMarbles = () => marbles;
 
-export { addMarble, removeMarble, getMarbles }
+export { addMarble, clearMarbles, getMarbles }

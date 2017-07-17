@@ -5,8 +5,8 @@ import getEventListeners from "./event-listeners";
 import Marble from "./marble";
 import Bar from "./bar";
 import getColliders from "./colliders";
-import { addBar, removeBar, getBars } from "./bars";
-import { addMarble, removeMarble, getMarbles } from "./marbles";
+import { addBar, clearBars, getBars } from "./bars";
+import { addMarble, clearMarbles, getMarbles } from "./marbles";
 
 
 const eventListeners = getEventListeners(380);
@@ -31,14 +31,14 @@ initViewPort(getResizeListeners([can, textCan],
 
 renderLoop();
 
-const game = () => {
+const game = (onFinish) => {
 	const leftSide = parseInt(Math.random() * 9, 10) + 1;
 	const rightSide = parseInt(Math.random() * (10 - leftSide), 10) + 1;
 	const textOpts = {y: 40, fill: "green", font: "bold 26px sans-serif"};
 
 	const clearLeftText = textRenderer.drawText(leftSide, {...textOpts,
 		x: 20});
-	const clearLeftRight = textRenderer.drawText(rightSide, {...textOpts,
+	const clearRightText = textRenderer.drawText(rightSide, {...textOpts,
 		x: 200});
 	const clearPlus = textRenderer.drawText("+", {...textOpts,
 		x: 110});
@@ -92,7 +92,8 @@ const game = () => {
 		}
 	});
 
-	window.setInterval(() => {
+
+	const interval = window.setInterval(() => {
 		getMarbles()
 			.filter(m => m.active)
 			.forEach(m => {
@@ -102,17 +103,33 @@ const game = () => {
 					m.fill = "green";
 					sumTextClear();
 					sumTextClear = textRenderer.drawText(++sumCount, {
-						...textOpts, x: 350, 
+						...textOpts, x: 340, 
 						fill: sumCount === leftSide + rightSide ? "green" : "red"});
+					if (sumCount === leftSide + rightSide) {
+						window.setTimeout(finishGame, 2000);
+					}
 				}
 			})
 	}, 5);
 
+	function finishGame() {
+		window.clearInterval(interval);
+		clearMarbles();
+		clearBars();
+		clearPlus();
+		clearLeftText();
+		clearEquals();
+		clearRightText();
+		sumTextClear();
+		onFinish();			
+	}
 };
 
-game();
 
+const startGame = () =>
+	game(startGame);
 
+startGame();
 
 /*
 
