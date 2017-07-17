@@ -44,6 +44,7 @@ const game = () => {
 		x: 110});
 	const clearEquals = textRenderer.drawText("=", {...textOpts,
 		x: 290});
+	let sumCount = 0, sumTextClear = () => {};
 
 	const baseMarbleOpts = {
 		y: 70, 
@@ -68,7 +69,7 @@ const game = () => {
 		new Bar(140, 150, 150, 5, 4),
 		new Bar(240, 200, 150, 175, 4),
 		new Bar(100, 300, 100, 5, 4),
-		new Bar(190, 350, 190, 0, 4),
+		new Bar(190, 370, 250, 0, 4),
 	]);
 
 
@@ -88,12 +89,24 @@ const game = () => {
 		
 		if (foundMarble) {
 			foundMarble.active = true;
-		}		
+		}
 	});
 
-	window.setInterval(() => getMarbles()
-		.filter(m => m.active)
-		.forEach(m => m.accelerate()), 5);
+	window.setInterval(() => {
+		getMarbles()
+			.filter(m => m.active)
+			.forEach(m => {
+				m.accelerate();
+				if (m._y > 358 && !m.done) {
+					m.done = true;
+					m.fill = "green";
+					sumTextClear();
+					sumTextClear = textRenderer.drawText(++sumCount, {
+						...textOpts, x: 350, 
+						fill: sumCount === leftSide + rightSide ? "green" : "red"});
+				}
+			})
+	}, 5);
 
 };
 
